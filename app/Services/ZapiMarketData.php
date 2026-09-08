@@ -124,11 +124,11 @@ class ZapiMarketData
             return [];
         }
 
-        return Cache::remember('market-data:zapi:index-week', now()->addHours(12), function (): array {
+        return Cache::remember('market-data:zapi:index-30d', now()->addDay(), function (): array {
             $points = [];
             $today = CarbonImmutable::now('Asia/Jakarta')->startOfDay();
 
-            for ($offset = 6; $offset >= 0; $offset--) {
+            for ($offset = 29; $offset >= 0; $offset--) {
                 $date = $today->subDays($offset);
                 if ($date->isWeekend()) {
                     continue;

@@ -33,7 +33,7 @@ class ZapiMarketDataTest extends TestCase
         Http::assertSent(fn ($request): bool => $request->hasHeader('x-api-key', 'test-key') && str_contains($request->url(), 'stock-summary'));
     }
 
-    public function test_index_cards_receive_a_week_of_points(): void
+    public function test_index_cards_receive_thirty_days_of_points(): void
     {
         config()->set('market.provider', 'zapi');
         config()->set('market.zapi.api_key', 'test-key');
@@ -60,6 +60,6 @@ class ZapiMarketDataTest extends TestCase
         $indices = app(ZapiMarketData::class)->indices();
 
         $this->assertCount(3, $indices);
-        $this->assertGreaterThanOrEqual(5, count($indices[0]['series']));
+        $this->assertGreaterThanOrEqual(20, count($indices[0]['series']));
     }
 }
