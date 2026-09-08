@@ -12,7 +12,7 @@ import {
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "./ui/empty";
 import { Input } from "./ui/input";
 import { Tabs, TabsList, TabsTab } from "./ui/tabs";
-import { MarketChart } from "../../../components/spectrumui/charts/market-chart";
+import { MarketChart } from "./spectrumui/charts/market-chart";
 import { MarketTable } from "./p-table-4";
 import { Footer } from "./footer";
 import { compactNumber, emptySnapshot, leaders } from "../lib/market";

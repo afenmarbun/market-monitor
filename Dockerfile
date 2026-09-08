@@ -8,7 +8,6 @@ ENV VITE_REVERB_HOST=$VITE_REVERB_HOST VITE_REVERB_PORT=$VITE_REVERB_PORT VITE_R
 COPY package*.json ./
 RUN npm ci
 COPY resources ./resources
-COPY components ./components
 COPY vite.config.js .
 RUN npm run build
 
