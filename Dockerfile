@@ -19,7 +19,7 @@ RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoload
 
 FROM php:8.4-fpm-alpine
 RUN apk add --no-cache icu-dev oniguruma-dev libzip-dev $PHPIZE_DEPS \
-    && docker-php-ext-install bcmath intl opcache pdo_mysql \
+    && docker-php-ext-install bcmath intl opcache pcntl pdo_mysql \
     && apk del $PHPIZE_DEPS
 WORKDIR /var/www/html
 COPY --from=vendor /app/vendor ./vendor
