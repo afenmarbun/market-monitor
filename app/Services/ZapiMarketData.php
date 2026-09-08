@@ -108,7 +108,7 @@ class ZapiMarketData
 
     public function indices(): array
     {
-        $indices = Cache::get('market-data:zapi:indices', []);
+        $indices = Cache::get('market-data:zapi:indices-v2', []);
         $series = collect($this->indexHistory())->groupBy('code')->map(fn ($items) => $items->pluck('value')->values()->all());
 
         return collect($indices)->map(function (array $index) use ($series): array {
@@ -124,7 +124,7 @@ class ZapiMarketData
             return [];
         }
 
-        return Cache::remember('market-data:zapi:index-30d', now()->addDay(), function (): array {
+        return Cache::remember('market-data:zapi:index-30d-v2', now()->addDay(), function (): array {
             $points = [];
             $today = CarbonImmutable::now('Asia/Jakarta')->startOfDay();
 
@@ -152,7 +152,7 @@ class ZapiMarketData
                         ->filter(fn (mixed $row): bool => is_array($row));
                     foreach ($rows as $row) {
                         $code = $row['IndexCode'] ?? $row['indexCode'] ?? null;
-                        $value = $this->number($row, ['Close', 'close']);
+                        $value = $this->decimal($row, ['Close', 'close']);
                         if (! in_array($code, ['COMPOSITE', 'LQ45', 'IDX30'], true) || $value === null) {
                             continue;
                         }
@@ -224,9 +224,9 @@ class ZapiMarketData
 
             $rows = collect($response->json('data.data', $response->json('data', [])))->filter(fn (mixed $row): bool => is_array($row));
             $indices = $rows->filter(fn (array $row): bool => in_array($row['IndexCode'] ?? $row['indexCode'] ?? null, ['COMPOSITE', 'LQ45', 'IDX30'], true))->map(function (array $row): array {
-                $value = $this->number($row, ['Close', 'close']) ?? 0;
-                $previous = $this->number($row, ['Previous', 'previous']) ?? $value;
-                $change = $this->number($row, ['Change', 'change']) ?? ($value - $previous);
+                $value = $this->decimal($row, ['Close', 'close']) ?? 0;
+                $previous = $this->decimal($row, ['Previous', 'previous']) ?? $value;
+                $change = $this->decimal($row, ['Change', 'change']) ?? ($value - $previous);
 
                 return [
                     'code' => $row['IndexCode'] ?? $row['indexCode'],
@@ -239,7 +239,7 @@ class ZapiMarketData
                 ];
             })->values()->all();
 
-            Cache::put('market-data:zapi:indices', $indices, now()->addDay());
+            Cache::put('market-data:zapi:indices-v2', $indices, now()->addDay());
         } catch (ConnectionException|\JsonException $exception) {
             Log::warning('Live index provider request failed.', ['message' => $exception->getMessage()]);
         }
@@ -266,6 +266,21 @@ class ZapiMarketData
         foreach ($keys as $key) {
             if (isset($data[$key]) && is_numeric($data[$key])) {
                 return (int) round((float) $data[$key]);
+            }
+        }
+
+        return null;
+    }
+
+    private function decimal(?array $data, array $keys): ?float
+    {
+        if ($data === null) {
+            return null;
+        }
+
+        foreach ($keys as $key) {
+            if (isset($data[$key]) && is_numeric($data[$key])) {
+                return (float) $data[$key];
             }
         }
 

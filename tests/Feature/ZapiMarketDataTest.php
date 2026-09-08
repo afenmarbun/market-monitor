@@ -45,9 +45,9 @@ class ZapiMarketDataTest extends TestCase
         Http::fake(function ($request) {
             if (str_contains($request->url(), 'index-summary')) {
                 return Http::response(['data' => ['data' => [
-                    ['IndexCode' => 'COMPOSITE', 'Close' => 6620, 'Previous' => 6600, 'Change' => 20],
-                    ['IndexCode' => 'LQ45', 'Close' => 656, 'Previous' => 650, 'Change' => 6],
-                    ['IndexCode' => 'IDX30', 'Close' => 367, 'Previous' => 360, 'Change' => 7],
+                    ['IndexCode' => 'COMPOSITE', 'Close' => 6620.375, 'Previous' => 6600.125, 'Change' => 20.25],
+                    ['IndexCode' => 'LQ45', 'Close' => 656.75, 'Previous' => 650.5, 'Change' => 6.25],
+                    ['IndexCode' => 'IDX30', 'Close' => 367.125, 'Previous' => 360.25, 'Change' => 6.875],
                 ]]], 200);
             }
 
@@ -60,6 +60,8 @@ class ZapiMarketDataTest extends TestCase
         $indices = app(ZapiMarketData::class)->indices();
 
         $this->assertCount(3, $indices);
+        $this->assertSame(6620.375, $indices[0]['value']);
+        $this->assertSame(6600.125, $indices[0]['previous']);
         $this->assertGreaterThanOrEqual(20, count($indices[0]['series']));
     }
 }
