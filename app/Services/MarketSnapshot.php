@@ -5,14 +5,22 @@ namespace App\Services;
 use App\Models\Instrument;
 use App\Models\PricePoint;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Builder;
 
 class MarketSnapshot
 {
     public function snapshot(): array
     {
-        $quotes = Instrument::query()->with('quote')->orderBy('symbol')->get()->map(fn (Instrument $instrument): array => $this->quote($instrument))->values()->all();
+        $quotes = Instrument::query()
+            ->whereHas('quote', fn (Builder $query): Builder => $query->where('source', 'live'))
+            ->with('quote')
+            ->orderBy('symbol')
+            ->get()
+            ->map(fn (Instrument $instrument): array => $this->quote($instrument))
+            ->values()
+            ->all();
         $asOf = collect($quotes)->pluck('quoted_at')->filter()->max() ?? now()->toISOString();
-        $source = collect($quotes)->pluck('source')->contains('live') ? 'live' : 'simulated';
+        $source = collect($quotes)->pluck('source')->contains('live') ? 'live' : 'unavailable';
 
         return ['quotes' => $quotes, 'as_of' => $asOf, 'source' => $source, 'session_date' => CarbonImmutable::parse($asOf)->setTimezone('Asia/Jakarta')->toDateString()];
     }
@@ -21,9 +29,9 @@ class MarketSnapshot
     {
         $instrument = Instrument::where('symbol', $symbol)->firstOrFail();
         $from = now()->subHours($range === '1h' ? 1 : 24);
-        $points = $instrument->pricePoints()->where('bucket_at', '>=', $from)->orderBy('bucket_at')->get()->map(fn (PricePoint $point): array => ['time' => $point->bucket_at->toISOString(), 'price' => $point->price, 'source' => $point->source])->values()->all();
+        $points = $instrument->pricePoints()->where('source', 'live')->where('bucket_at', '>=', $from)->orderBy('bucket_at')->get()->map(fn (PricePoint $point): array => ['time' => $point->bucket_at->toISOString(), 'price' => $point->price, 'source' => $point->source])->values()->all();
 
-        return ['symbol' => $symbol, 'range' => $range, 'points' => $points, 'as_of' => optional($instrument->quote)->quoted_at?->toISOString() ?? now()->toISOString(), 'source' => optional($instrument->quote)->source ?? 'simulated'];
+        return ['symbol' => $symbol, 'range' => $range, 'points' => $points, 'as_of' => optional($instrument->quote)->quoted_at?->toISOString() ?? now()->toISOString(), 'source' => optional($instrument->quote)->source ?? 'unavailable'];
     }
 
     public function quote(Instrument $instrument): array
@@ -54,7 +62,7 @@ class MarketSnapshot
             'high' => $quote?->high ?? max($price, $previousClose),
             'low' => $quote?->low ?? min($price, $previousClose),
             'volume' => $volume,
-            'source' => $quote?->source ?? 'simulated',
+            'source' => $quote?->source ?? 'unavailable',
             'quoted_at' => $quote?->quoted_at?->toISOString(),
         ];
     }

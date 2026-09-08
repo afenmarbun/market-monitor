@@ -1,6 +1,6 @@
 # Market Monitor
 
-Market Monitor adalah dashboard publik untuk memantau data saham BEI. Aplikasi mendukung data live melalui Zapi dan fallback simulator untuk local development atau saat provider eksternal belum dikonfigurasi. Harga, perubahan, volume, dan riwayat grafik tersedia melalui HTTP serta Laravel Reverb.
+Market Monitor adalah dashboard publik untuk memantau data saham BEI. Aplikasi menggunakan data live melalui Zapi. Harga, perubahan, volume, dan riwayat grafik tersedia melalui HTTP serta Laravel Reverb.
 
 ## Menjalankan lokal
 
@@ -14,7 +14,7 @@ npm run build
 php artisan serve
 ```
 
-Jalankan simulator pada terminal lain dengan `php artisan schedule:work`. Buka `http://localhost:8000`. Endpoint pemeriksaan aplikasi ada di `/up`; snapshot pasar ada di `/api/market/snapshot`.
+Isi `ZPI_API_KEY`, lalu jalankan scheduler pada terminal lain dengan `php artisan schedule:work`. Buka `http://localhost:8000`. Endpoint pemeriksaan aplikasi ada di `/up`; snapshot pasar ada di `/api/market/snapshot`.
 
 ## Mengaktifkan data live IDX
 
@@ -28,7 +28,7 @@ MARKET_DATA_POLL_SECONDS=900
 MARKET_DATA_ONLY_OPEN_SESSION=true
 ```
 
-Tanpa `ZPI_API_KEY`, aplikasi otomatis memakai simulator. Key tidak boleh dimasukkan ke React atau variable `VITE_*`. Endpoint bulk Zapi yang digunakan adalah `stock-summary`, sehingga satu request mengambil seluruh daftar saham lokal per interval. Default interval 15 menit hanya pada jam perdagangan IDX agar free tier 600 request/bulan tidak cepat habis. Paket berbayar dapat memakai interval lebih pendek. Provider gagal atau timeout tidak menghapus data terakhir yang tersimpan.
+Tanpa `ZPI_API_KEY`, aplikasi tidak menampilkan kuotasi buatan dan perintah `market:tick` gagal dengan pesan konfigurasi. Key tidak boleh dimasukkan ke React atau variable `VITE_*`. Endpoint bulk Zapi yang digunakan adalah `stock-summary`, sehingga satu request mengambil seluruh daftar saham lokal per interval. Default interval 15 menit hanya pada jam perdagangan IDX agar free tier 600 request/bulan tidak cepat habis. Paket berbayar dapat memakai interval lebih pendek. Provider gagal atau timeout tidak menghapus data live terakhir yang tersimpan.
 
 ## Docker Compose
 

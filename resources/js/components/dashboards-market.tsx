@@ -48,7 +48,7 @@ export function DashboardsMarket({ initialSnapshot }: Props) {
         !providerStatus?.fallback_active &&
         Date.now() - new Date(snapshot.as_of).getTime() < freshnessWindow;
     const sourceLabel =
-        snapshot.source === "live" ? "Live IDX via Zapi" : "Simulated data";
+        snapshot.source === "live" ? "Live IDX via Zapi" : "Live data unavailable";
     const filtered = useMemo(
         () =>
             snapshot.quotes

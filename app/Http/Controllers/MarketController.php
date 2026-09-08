@@ -24,7 +24,7 @@ class MarketController extends Controller
 
     public function indices(ZapiMarketData $provider): JsonResponse
     {
-        return response()->json(['indices' => $provider->indices(), 'source' => $provider->enabled() ? 'live' : 'simulated']);
+        return response()->json(['indices' => $provider->indices(), 'source' => $provider->enabled() ? 'live' : 'unavailable']);
     }
 
     public function status(ZapiMarketData $provider): JsonResponse

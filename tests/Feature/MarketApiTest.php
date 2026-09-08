@@ -14,12 +14,20 @@ class MarketApiTest extends TestCase
         $this->seed();
         $snapshot = $this->getJson('/api/market/snapshot');
         $snapshot->assertOk()->assertJsonStructure(['quotes', 'as_of', 'source', 'session_date']);
-        $symbol = $snapshot->json('quotes.0.symbol');
-
-        $this->getJson("/api/market/{$symbol}/history?range=1h")
+        $this->getJson('/api/market/BBCA/history?range=1h')
             ->assertOk()
-            ->assertJsonPath('symbol', $symbol)
+            ->assertJsonPath('symbol', 'BBCA')
             ->assertJsonPath('range', '1h');
+    }
+
+    public function test_snapshot_does_not_invent_quotes_without_live_data(): void
+    {
+        $this->seed();
+
+        $this->getJson('/api/market/snapshot')
+            ->assertOk()
+            ->assertJsonPath('quotes', [])
+            ->assertJsonPath('source', 'unavailable');
     }
 
     public function test_invalid_history_range_and_symbol_fail(): void

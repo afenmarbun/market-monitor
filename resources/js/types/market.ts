@@ -19,7 +19,7 @@ export type Quote = {
     source: MarketSource;
     quoted_at: string | null;
 };
-export type MarketSource = "live" | "simulated";
+export type MarketSource = "live" | "unavailable";
 export type Snapshot = {
     quotes: Quote[];
     as_of: string;

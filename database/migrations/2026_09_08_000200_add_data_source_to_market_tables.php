@@ -9,10 +9,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('quotes', function (Blueprint $table): void {
-            $table->string('source', 20)->default('simulated')->after('volume');
+            $table->string('source', 20)->default('unavailable')->after('volume');
         });
         Schema::table('price_points', function (Blueprint $table): void {
-            $table->string('source', 20)->default('simulated')->after('price');
+            $table->string('source', 20)->default('unavailable')->after('price');
         });
     }
 

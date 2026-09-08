@@ -16,6 +16,6 @@ export const leaders = (quotes: Quote[], limit = 3) => ({
 export const emptySnapshot: Snapshot = {
     quotes: [],
     as_of: new Date().toISOString(),
-    source: "simulated",
+    source: "unavailable",
     session_date: "",
 };
