@@ -17,7 +17,7 @@ WORKDIR /app
 COPY composer.json composer.lock ./
 RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader --no-scripts
 
-FROM php:8.4-fpm-alpine
+FROM php:8.4-fpm-alpine AS runtime
 RUN apk add --no-cache icu-dev oniguruma-dev libzip-dev $PHPIZE_DEPS \
     && docker-php-ext-install bcmath intl opcache pcntl pdo_mysql \
     && apk del $PHPIZE_DEPS
@@ -31,3 +31,7 @@ RUN cp .env.example .env.production.example \
 USER www-data
 EXPOSE 9000
 CMD ["php-fpm", "-F"]
+
+FROM nginx:1.27-alpine AS web
+COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=runtime /var/www/html/public /var/www/html/public

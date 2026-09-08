@@ -33,11 +33,15 @@ services:
         condition: service_healthy
     restart: unless-stopped
   web:
-    image: nginx:1.27-alpine
+    build:
+      context: .
+      target: web
+      args:
+        VITE_REVERB_HOST: ${VITE_REVERB_HOST:-localhost}
+        VITE_REVERB_PORT: ${VITE_REVERB_PORT:-8080}
+        VITE_REVERB_SCHEME: ${VITE_REVERB_SCHEME:-http}
+        VITE_REVERB_APP_KEY: ${REVERB_APP_KEY:-market-monitor-key}
     ports: ["127.0.0.1:8080:80"]
-    volumes:
-      - .:/var/www/html:ro
-      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on: [app, reverb]
     restart: unless-stopped
   db:
